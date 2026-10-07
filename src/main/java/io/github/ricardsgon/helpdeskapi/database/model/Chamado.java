@@ -1,16 +1,20 @@
 package io.github.ricardsgon.helpdeskapi.database.model;
 
+import io.github.ricardsgon.helpdeskapi.dto.Prioridade;
+import io.github.ricardsgon.helpdeskapi.dto.Status;
+import lombok.Builder;
 import lombok.Getter;
 
 @Getter
+@Builder
 public class Chamado {
     private final Long id;
     private String titulo;
     private String descricao;
-    private String prioridade;
-    private String status;
+    private Prioridade prioridade;
+    private Status status;
 
-    public Chamado(Long id, String titulo, String descricao, String prioridade, String status) {
+    public Chamado(Long id, String titulo, String descricao, Prioridade prioridade, Status status) {
         this.id = id;
         this.titulo = titulo;
         this.descricao = descricao;
