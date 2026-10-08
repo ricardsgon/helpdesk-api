@@ -1,7 +1,7 @@
 package io.github.ricardsgon.helpdeskapi.controller;
 
-import io.github.ricardsgon.helpdeskapi.database.model.Chamado;
 import io.github.ricardsgon.helpdeskapi.dto.ChamadoRequestDTO;
+import io.github.ricardsgon.helpdeskapi.dto.ChamadoResponseDTO;
 import io.github.ricardsgon.helpdeskapi.service.ChamadoService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -19,26 +19,26 @@ public class ChamadoController {
     }
 
     @GetMapping
-    @ResponseStatus(HttpStatus.ACCEPTED)
-    public List<Chamado> getChamados() {
+    @ResponseStatus(HttpStatus.OK)
+    public List<ChamadoResponseDTO> getChamados() {
         return chamadoService.listar();
     }
 
     @GetMapping("/{id}")
-    @ResponseStatus(HttpStatus.ACCEPTED)
-    public Chamado getChamadoById(@PathVariable Long id) {
+    @ResponseStatus(HttpStatus.OK)
+    public ChamadoResponseDTO getChamadoById(@PathVariable Long id) {
         return chamadoService.buscarPorId(id);
     }
 
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public Chamado createChamado(@Valid @RequestBody ChamadoRequestDTO chamadoRequestDTO) {
+    public ChamadoResponseDTO createChamado(@Valid @RequestBody ChamadoRequestDTO chamadoRequestDTO) {
         return chamadoService.criar(chamadoRequestDTO);
     }
 
     @PutMapping("/{id}")
-    public Chamado atualizarChamado(@Valid @RequestBody ChamadoRequestDTO chamadoRequestDTO, @PathVariable Long id) {
+    public ChamadoResponseDTO atualizarChamado(@Valid @RequestBody ChamadoRequestDTO chamadoRequestDTO, @PathVariable Long id) {
         return chamadoService.atualizar(id, chamadoRequestDTO);
     }
 
