@@ -4,6 +4,7 @@ import io.github.ricardsgon.helpdeskapi.database.model.Chamado;
 import io.github.ricardsgon.helpdeskapi.dto.ChamadoRequestDTO;
 import io.github.ricardsgon.helpdeskapi.dto.Prioridade;
 import io.github.ricardsgon.helpdeskapi.dto.Status;
+import io.github.ricardsgon.helpdeskapi.exception.ChamadoNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -22,7 +23,7 @@ public class ChamadoService {
         return chamados.stream()
                 .filter(chamado -> chamado.getId().equals(id))
                 .findFirst()
-                .orElse(null);
+                .orElseThrow(() -> new ChamadoNotFoundException(id));
     }
 
     public Chamado criar(ChamadoRequestDTO chamadoRequestDTO) {
@@ -40,5 +41,21 @@ public class ChamadoService {
                     .build();
             chamados.add(chamado);
             return chamado;
+    }
+
+    public Chamado atualizar(Long id, ChamadoRequestDTO chamadoRequestDTO) {
+        Chamado chamado = buscarPorId(id);
+        chamado.setTitulo(chamadoRequestDTO.getTitulo());
+        chamado.setDescricao(chamadoRequestDTO.getDescricao());
+        chamado.setStatus(chamadoRequestDTO.getStatus());
+        chamado.setPrioridade(chamadoRequestDTO.getPrioridade());
+
+        return chamado;
+
+    }
+
+    public void deletar(Long id) {
+        Chamado chamado = buscarPorId(id);
+        chamados.remove(chamado);
     }
 }

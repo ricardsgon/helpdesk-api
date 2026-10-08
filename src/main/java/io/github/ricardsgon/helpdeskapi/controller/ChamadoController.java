@@ -36,4 +36,15 @@ public class ChamadoController {
     public Chamado createChamado(@Valid @RequestBody ChamadoRequestDTO chamadoRequestDTO) {
         return chamadoService.criar(chamadoRequestDTO);
     }
+
+    @PutMapping("/{id}")
+    public Chamado atualizarChamado(@Valid @RequestBody ChamadoRequestDTO chamadoRequestDTO, @PathVariable Long id) {
+        return chamadoService.atualizar(id, chamadoRequestDTO);
+    }
+
+    @DeleteMapping("/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteChamado(@PathVariable Long id) {
+        chamadoService.deletar(id);
+    }
 }
