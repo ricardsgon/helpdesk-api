@@ -10,12 +10,12 @@ import lombok.Setter;
 public class ChamadoRequestDTO {
 
 
-    @NotBlank
+    @NotBlank(message = "Título não pode estar vazio")
     private String titulo;
-    @NotBlank
+    @NotBlank(message = "Descrição não pode estar vazia")
     private String descricao;
-    @NotNull
+    @NotNull(message = "Prioridade não pode ser nulo")
     private Prioridade prioridade;
-    @NotNull
+    @NotNull(message = "Status não pode ser nulo")
     private Status status;
 }
