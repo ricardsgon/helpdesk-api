@@ -70,7 +70,7 @@ public class ChamadoService {
                 .orElseThrow(() -> new ChamadoNotFoundException(id));
     }
 
-    public ChamadoResponseDTO toChamadoResponseDTO(Chamado chamado) {
+    private ChamadoResponseDTO toChamadoResponseDTO(Chamado chamado) {
         return new ChamadoResponseDTO(
                 chamado.getId(),
                 chamado.getTitulo(),
