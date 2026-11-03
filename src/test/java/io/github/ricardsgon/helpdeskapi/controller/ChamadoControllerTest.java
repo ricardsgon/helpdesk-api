@@ -3,8 +3,8 @@ package io.github.ricardsgon.helpdeskapi.controller;
 
 import io.github.ricardsgon.helpdeskapi.dto.ChamadoRequestDTO;
 import io.github.ricardsgon.helpdeskapi.dto.ChamadoResponseDTO;
-import io.github.ricardsgon.helpdeskapi.dto.Prioridade;
-import io.github.ricardsgon.helpdeskapi.dto.Status;
+import io.github.ricardsgon.helpdeskapi.database.model.Prioridade;
+import io.github.ricardsgon.helpdeskapi.database.model.Status;
 import io.github.ricardsgon.helpdeskapi.exception.ChamadoNotFoundException;
 import io.github.ricardsgon.helpdeskapi.service.ChamadoService;
 import org.junit.jupiter.api.Test;

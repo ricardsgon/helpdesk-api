@@ -1,4 +1,6 @@
 package io.github.ricardsgon.helpdeskapi.dto;
+import io.github.ricardsgon.helpdeskapi.database.model.Prioridade;
+import io.github.ricardsgon.helpdeskapi.database.model.Status;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
