@@ -1,72 +1,60 @@
 package io.github.ricardsgon.helpdeskapi.service;
 
 import io.github.ricardsgon.helpdeskapi.database.model.Chamado;
+import io.github.ricardsgon.helpdeskapi.database.repository.ChamadoRepository;
 import io.github.ricardsgon.helpdeskapi.dto.ChamadoRequestDTO;
 import io.github.ricardsgon.helpdeskapi.dto.ChamadoResponseDTO;
-import io.github.ricardsgon.helpdeskapi.dto.Prioridade;
-import io.github.ricardsgon.helpdeskapi.dto.Status;
 import io.github.ricardsgon.helpdeskapi.exception.ChamadoNotFoundException;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Service
 public class ChamadoService {
 
-    private final List<Chamado> chamados = new ArrayList<>(List.of(
-            Chamado.builder().id(1L).titulo("Impressora não funciona").descricao("Impressora não está conectando na rede").prioridade(Prioridade.ALTA).status(Status.ANDAMENTO).build(),
-            Chamado.builder().id(2L).titulo("Computador não liga").descricao("Computador não está ligando").prioridade(Prioridade.BAIXA).status(Status.ANDAMENTO).build()
-    ));
+    private final ChamadoRepository chamadoRepository;
+
+    public ChamadoService(ChamadoRepository chamadoRepository) {
+        this.chamadoRepository = chamadoRepository;
+    }
 
     public List<ChamadoResponseDTO> listar() {
-        return chamados.stream()
+        return chamadoRepository.findAll().stream()
                 .map(this::toChamadoResponseDTO)
                 .toList();
     }
 
     public ChamadoResponseDTO buscarPorId(Long id) {
-        Chamado chamado = encontrarEntidadePorId(id);
-        return toChamadoResponseDTO(chamado);
+        return toChamadoResponseDTO(encontrarEntidadePorId(id));
     }
 
-    public ChamadoResponseDTO criar(ChamadoRequestDTO chamadoRequestDTO) {
-        Long novoId = chamados.stream()
-                .mapToLong(Chamado::getId)
-                .max()
-                .orElse(0L) + 1;
-
+    public ChamadoResponseDTO criar(ChamadoRequestDTO dto) {
         Chamado chamado = Chamado.builder()
-                .id(novoId)
-                .titulo(chamadoRequestDTO.getTitulo())
-                .descricao(chamadoRequestDTO.getDescricao())
-                .prioridade(chamadoRequestDTO.getPrioridade())
-                .status(chamadoRequestDTO.getStatus())
+                .titulo(dto.getTitulo())
+                .descricao(dto.getDescricao())
+                .prioridade(dto.getPrioridade())
+                .status(dto.getStatus())
                 .build();
 
-        chamados.add(chamado);
-        return toChamadoResponseDTO(chamado);
+        return toChamadoResponseDTO(chamadoRepository.save(chamado));
     }
 
-    public ChamadoResponseDTO atualizar(Long id, ChamadoRequestDTO chamadoRequestDTO) {
+    public ChamadoResponseDTO atualizar(Long id, ChamadoRequestDTO dto) {
         Chamado chamado = encontrarEntidadePorId(id);
-        chamado.setTitulo(chamadoRequestDTO.getTitulo());
-        chamado.setDescricao(chamadoRequestDTO.getDescricao());
-        chamado.setStatus(chamadoRequestDTO.getStatus());
-        chamado.setPrioridade(chamadoRequestDTO.getPrioridade());
+        chamado.setTitulo(dto.getTitulo());
+        chamado.setDescricao(dto.getDescricao());
+        chamado.setPrioridade(dto.getPrioridade());
+        chamado.setStatus(dto.getStatus());
 
-        return toChamadoResponseDTO(chamado);
+        return toChamadoResponseDTO(chamadoRepository.save(chamado));
     }
 
     public void deletar(Long id) {
-        Chamado chamado = encontrarEntidadePorId(id);
-        chamados.remove(chamado);
+        chamadoRepository.delete(encontrarEntidadePorId(id));
     }
 
     private Chamado encontrarEntidadePorId(Long id) {
-        return chamados.stream()
-                .filter(c -> c.getId().equals(id))
-                .findFirst()
+        return chamadoRepository.findById(id)
                 .orElseThrow(() -> new ChamadoNotFoundException(id));
     }
 

@@ -1,151 +1,143 @@
-
 package io.github.ricardsgon.helpdeskapi.service;
 
+import io.github.ricardsgon.helpdeskapi.database.model.Chamado;
+import io.github.ricardsgon.helpdeskapi.database.model.Prioridade;
+import io.github.ricardsgon.helpdeskapi.database.model.Status;
+import io.github.ricardsgon.helpdeskapi.database.repository.ChamadoRepository;
 import io.github.ricardsgon.helpdeskapi.dto.ChamadoRequestDTO;
 import io.github.ricardsgon.helpdeskapi.dto.ChamadoResponseDTO;
-import io.github.ricardsgon.helpdeskapi.dto.Prioridade;
-import io.github.ricardsgon.helpdeskapi.dto.Status;
 import io.github.ricardsgon.helpdeskapi.exception.ChamadoNotFoundException;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+
+import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 
+@ExtendWith(MockitoExtension.class)
 class ChamadoServiceTest {
 
-    private ChamadoService chamadoService;
+    @Mock
+    private ChamadoRepository chamadoRepository;
 
-    @BeforeEach
-    void setUp() {
-        chamadoService = new ChamadoService();
-    }
+    @InjectMocks
+    private ChamadoService chamadoService;
 
     @Test
     void deveListarChamados() {
-        var chamados = chamadoService.listar();
+        given(chamadoRepository.findAll()).willReturn(List.of(criarChamado()));
 
-        assertNotNull(chamados);
+        List<ChamadoResponseDTO> resultado = chamadoService.listar();
+
+        assertEquals(1, resultado.size());
+        assertEquals("Teclado não funciona", resultado.getFirst().titulo());
+    }
+
+    @Test
+    void deveBuscarChamadoPorId() {
+        given(chamadoRepository.findById(1L)).willReturn(Optional.of(criarChamado()));
+
+        ChamadoResponseDTO resultado = chamadoService.buscarPorId(1L);
+
+        assertEquals(1L, resultado.id());
+        assertEquals(Prioridade.ALTA, resultado.prioridade());
     }
 
     @Test
     void deveLancarExcecaoQuandoChamadoNaoExiste() {
-        assertThrows(
-                ChamadoNotFoundException.class,
-                () -> chamadoService.buscarPorId(999L)
-        );
+        given(chamadoRepository.findById(999L)).willReturn(Optional.empty());
+
+        assertThrows(ChamadoNotFoundException.class,
+                () -> chamadoService.buscarPorId(999L));
     }
 
     @Test
     void deveCriarChamado() {
-        ChamadoRequestDTO request = criarRequest(
-                "Teclado não funciona",
-                "Teclado do laboratório não está funcionando",
-                Prioridade.ALTA,
-                Status.ABERTO
-        );
+        given(chamadoRepository.save(any(Chamado.class))).willAnswer(invocation -> {
+            Chamado salvo = invocation.getArgument(0);
+            salvo.setId(10L);
+            return salvo;
+        });
 
-        int quantidadeInicial = chamadoService.listar().size();
+        ChamadoResponseDTO resposta = chamadoService.criar(
+                criarRequest("Mouse quebrado", "Mouse da sala 2", Prioridade.BAIXA, Status.ABERTO));
 
-        ChamadoResponseDTO response = chamadoService.criar(request);
-
-        assertNotNull(response.id());
-        assertEquals("Teclado não funciona", response.titulo());
-        assertEquals(
-                "Teclado do laboratório não está funcionando",
-                response.descricao()
-        );
-        assertEquals(Prioridade.ALTA, response.prioridade());
-        assertEquals(Status.ABERTO, response.status());
-        assertEquals(quantidadeInicial + 1, chamadoService.listar().size());
-
-        ChamadoResponseDTO chamadoSalvo =
-                chamadoService.buscarPorId(response.id());
-
-        assertEquals(response.titulo(), chamadoSalvo.titulo());
+        assertEquals(10L, resposta.id());
+        assertEquals("Mouse quebrado", resposta.titulo());
+        assertEquals(Status.ABERTO, resposta.status());
     }
 
     @Test
     void deveAtualizarChamado() {
-        Long id = chamadoService.listar().getFirst().id();
+        given(chamadoRepository.findById(1L)).willReturn(Optional.of(criarChamado()));
+        given(chamadoRepository.save(any(Chamado.class)))
+                .willAnswer(invocation -> invocation.getArgument(0));
 
-        ChamadoRequestDTO request = criarRequest(
-                "Impressora atualizada",
-                "Impressora voltou a apresentar problemas",
-                Prioridade.BAIXA,
-                Status.ENCERRADO
-        );
+        ChamadoResponseDTO resposta = chamadoService.atualizar(1L,
+                criarRequest("Atualizado", "Nova descrição", Prioridade.BAIXA, Status.ENCERRADO));
 
-        ChamadoResponseDTO response =
-                chamadoService.atualizar(id, request);
-
-        assertEquals(id, response.id());
-        assertEquals("Impressora atualizada", response.titulo());
-        assertEquals(
-                "Impressora voltou a apresentar problemas",
-                response.descricao()
-        );
-        assertEquals(Prioridade.BAIXA, response.prioridade());
-        assertEquals(Status.ENCERRADO, response.status());
-
-        ChamadoResponseDTO chamadoAtualizado =
-                chamadoService.buscarPorId(id);
-
-        assertEquals("Impressora atualizada", chamadoAtualizado.titulo());
-        assertEquals(Status.ENCERRADO, chamadoAtualizado.status());
-    }
-
-    @Test
-    void deveRemoverChamado() {
-        Long id = chamadoService.listar().getFirst().id();
-        int quantidadeInicial = chamadoService.listar().size();
-
-        chamadoService.deletar(id);
-
-        assertEquals(quantidadeInicial - 1, chamadoService.listar().size());
-
-        assertThrows(
-                ChamadoNotFoundException.class,
-                () -> chamadoService.buscarPorId(id)
-        );
+        assertEquals(1L, resposta.id());
+        assertEquals("Atualizado", resposta.titulo());
+        assertEquals(Status.ENCERRADO, resposta.status());
     }
 
     @Test
     void deveLancarExcecaoAoAtualizarChamadoInexistente() {
-        ChamadoRequestDTO request = criarRequest(
-                "Chamado inexistente",
-                "Teste de atualização",
-                Prioridade.ALTA,
-                Status.ABERTO
-        );
+        given(chamadoRepository.findById(999L)).willReturn(Optional.empty());
 
-        assertThrows(
-                ChamadoNotFoundException.class,
-                () -> chamadoService.atualizar(999L, request)
-        );
+        assertThrows(ChamadoNotFoundException.class,
+                () -> chamadoService.atualizar(999L,
+                        criarRequest("x", "y", Prioridade.ALTA, Status.ABERTO)));
+
+        verify(chamadoRepository, never()).save(any());
+    }
+
+    @Test
+    void deveRemoverChamado() {
+        Chamado chamado = criarChamado();
+        given(chamadoRepository.findById(1L)).willReturn(Optional.of(chamado));
+
+        chamadoService.deletar(1L);
+
+        verify(chamadoRepository).delete(chamado);
     }
 
     @Test
     void deveLancarExcecaoAoDeletarChamadoInexistente() {
-        assertThrows(
-                ChamadoNotFoundException.class,
-                () -> chamadoService.deletar(999L)
-        );
+        given(chamadoRepository.findById(999L)).willReturn(Optional.empty());
+
+        assertThrows(ChamadoNotFoundException.class,
+                () -> chamadoService.deletar(999L));
+
+        verify(chamadoRepository, never()).delete(any());
     }
 
-    private ChamadoRequestDTO criarRequest(
-            String titulo,
-            String descricao,
-            Prioridade prioridade,
-            Status status
-    ) {
+    private Chamado criarChamado() {
+        return Chamado.builder()
+                .id(1L)
+                .titulo("Teclado não funciona")
+                .descricao("Teclado do laboratório")
+                .prioridade(Prioridade.ALTA)
+                .status(Status.ABERTO)
+                .build();
+    }
+
+    private ChamadoRequestDTO criarRequest(String titulo, String descricao,
+                                           Prioridade prioridade, Status status) {
         ChamadoRequestDTO request = new ChamadoRequestDTO();
         request.setTitulo(titulo);
         request.setDescricao(descricao);
         request.setPrioridade(prioridade);
         request.setStatus(status);
-
         return request;
     }
 }
