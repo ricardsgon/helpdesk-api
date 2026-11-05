@@ -13,6 +13,7 @@ O projeto nasceu da minha experiência de 2 anos como estagiário de suporte té
 - Lombok
 - Maven (com Maven Wrapper)
 - JUnit 5 e Mockito
+- springdoc-openapi (Swagger UI)
 
 ## Pré-requisitos
 
@@ -63,7 +64,7 @@ mvnw.cmd spring-boot:run
 mvn spring-boot:run
 ```
 
-Por padrão, a API sobe em `http://localhost:8080`.
+Por padrão, a API sobe em `http://localhost:8080`. A documentação interativa (Swagger UI) fica em `http://localhost:8080/swagger-ui/index.html`
 
 ## Testes
 
@@ -117,6 +118,7 @@ helpdesk-api
 │   ├── main
 │   │   ├── java/io/github/ricardsgon/helpdeskapi
 │   │   │   ├── controller
+│   │   │   ├── config
 │   │   │   ├── service
 │   │   │   ├── dto
 │   │   │   ├── database
@@ -131,10 +133,9 @@ helpdesk-api
 ## Próximos passos
 
 - Autenticação e perfis (usuário / técnico / administrador)
-- Documentação com Swagger / OpenAPI
 - Docker Compose para subir API + banco
 - Migrações de banco com Flyway
-- Integração contínua com GitHub Actions
+
 
 ## Autor
 
