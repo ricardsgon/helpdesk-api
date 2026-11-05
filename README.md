@@ -1,4 +1,5 @@
 # Helpdesk API
+![CI](https://github.com/ricardsgon/helpdesk-api/actions/workflows/ci.yml/badge.svg)
 
 REST API para um sistema de helpdesk (abertura e acompanhamento de chamados de suporte), desenvolvida com **Java 21** e **Spring Boot**.
 
