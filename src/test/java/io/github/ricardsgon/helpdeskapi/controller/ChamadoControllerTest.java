@@ -235,4 +235,47 @@ class ChamadoControllerTest {
                 .andExpect(jsonPath("$.message")
                         .value("Chamado não encontrado: 999"));
     }
+
+    @Test
+    void deveRetornar400QuandoPrioridadeInvalida() throws Exception {
+        String json = """
+                {
+                    "titulo": "Teclado não funciona",
+                    "descricao": "Teclado do laboratório",
+                    "prioridade": "URGENTE",
+                    "status": "ABERTO"
+                }
+                """;
+
+        mockMvc.perform(post("/chamados")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.status").value(400))
+                .andExpect(jsonPath("$.message",
+                        containsString("prioridade")));
+
+        verifyNoInteractions(chamadoService);
+    }
+
+    @Test
+    void deveRetornar400QuandoJsonMalformado() throws Exception {
+        mockMvc.perform(post("/chamados")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{ \"titulo\": "))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.status").value(400));
+
+        verifyNoInteractions(chamadoService);
+    }
+
+    @Test
+    void deveRetornar400QuandoIdNaoNumerico() throws Exception {
+        mockMvc.perform(get("/chamados/abc"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.status").value(400))
+                .andExpect(jsonPath("$.message", containsString("id")));
+
+        verifyNoInteractions(chamadoService);
+    }
 }
